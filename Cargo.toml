@@ -1,9 +1,9 @@
 [package]
 name = "file_indexing"
 version = "0.2.0"
-authors = ["rifqideveloper <zombititi@gmail.com>"]
+authors = ["rifqideveloper"]
 edition = "2018"
-
+license-file = "LICENSE"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
