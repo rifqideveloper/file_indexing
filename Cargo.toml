@@ -4,6 +4,7 @@ version = "0.2.0"
 authors = ["rifqideveloper"]
 edition = "2018"
 license-file = "LICENSE"
+description = "library for editing file fast and memory efficient"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
