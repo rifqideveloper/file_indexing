@@ -26,6 +26,8 @@ extern crate file_indexing;
     file_indexing::pust(file, "pust\n").expect("msg: &str");
 ## len 
     file_indexing::len(file).expect("msg: &str");
+## rotate
+    file_indexing::rotate(file, 1000).expect("msg: &str");
 ## struct FileIndexing
     let f = file_indexing::FileIndexing{file:file.to_string()};
         println!("{}", f.readto_string().expect("erro"));
