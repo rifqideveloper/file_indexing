@@ -161,3 +161,85 @@ pub fn replase_line(path:&str,replase:&str,line:usize)->io::Result<()>{
     std::fs::rename(format!("{}._pengganti",path), format!("{}",path))?;
     Ok(())
 }
+#[allow(dead_code)]
+pub fn rotate(path:&str,lop:usize) ->io::Result<()> {
+    use std::io::Write;
+    for i in 0.. {
+        if i == lop {break}
+        let mut buf2 = String::with_capacity(20);
+        {
+            let mut file = BufReader::new(File::open(format!("{}",path))?);
+            let mut file_ganti = std::fs::File::create(format!("{}._pengganti",path))?;
+            if file.read_line(&mut buf2)? != 0 {
+                let mut buf = String::new();
+                while file.read_line(&mut buf)? != 0 {
+                    file_ganti.write(buf.as_bytes())?;
+                    buf.clear()
+                }
+            }
+            file_ganti.write(buf2.as_bytes())?;
+        }
+        std::fs::rename(format!("{}._pengganti",path), format!("{}",path))?;
+    }
+    Ok(())
+}
+#[allow(dead_code)]
+pub fn len(path:&str) ->io::Result<usize> {
+    let mut i :usize = 0;
+    for _ in BufReader::new(File::open(path)?).lines() {
+        i = i + 1
+    }
+    Ok(i)
+}
+#[allow(dead_code)]
+pub fn pop(path:&str) ->io::Result<()> {
+    delete_line(path, len(path)?)?;
+    Ok(())
+}
+#[allow(dead_code)]
+pub fn pust(path:&str,_str:&str) ->io::Result<()> {
+    {
+        use std::io::Write;
+        let mut file_ganti = std::fs::File::create(format!("{}._pengganti",path))?;
+        let mut file = BufReader::new(File::open(format!("{}",path))?);
+        let mut buf = String::new();
+        while file.read_line(&mut buf)? != 0 {
+            file_ganti.write(buf.as_bytes())?;
+            buf.clear()
+        }
+        file_ganti.write(_str.as_bytes())?;
+    }
+    std::fs::rename(format!("{}._pengganti",path), format!("{}",path))?;
+    Ok(())
+}
+#[allow(dead_code)]
+pub struct FileIndexing{
+    pub file:String
+}
+#[allow(dead_code)]
+impl FileIndexing {
+    pub fn len(&self) ->io::Result<usize>{
+        len(&self.file)
+    }
+    pub fn index(&self,indx:usize)->io::Result<String>{
+        read_line_index(&self.file,indx)
+    }
+    pub fn pop(&self)->io::Result<()>{
+        pop(&self.file)
+    }
+    pub fn rotate(&self,lop: usize) ->io::Result<()>{
+        rotate(&self.file, lop)
+    }
+    pub fn pust_str(&self,_str: &str)->io::Result<()>{
+        pust(&self.file, _str)
+    }
+    pub fn replase_line(&self,replase:&str,line:usize)->io::Result<()>{
+        replase_line(&self.file, replase, line)
+    }
+    pub fn readto_string(&self)->io::Result<String>{
+        std::fs::read_to_string(&self.file)
+    }
+    pub fn delete(self)->io::Result<()>{
+        std::fs::remove_file(self.file)
+    }
+}
