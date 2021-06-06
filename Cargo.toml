@@ -1,10 +1,11 @@
 [package]
 name = "file_indexing"
-version = "0.3.1"
+version = "0.4.0"
 authors = ["rifqideveloper zombititi@gmail.com"]
 edition = "2018"
 license = "MIT"
-categories = ["io","file","editor"]
+categories = ["Filesystem","Text editors","Algorithms"]
+keywords = ["file indexing", "file editing","file","editing"]
 repository = "https://github.com/rifqideveloper/file_indexing.git"
 description = "library for editing file fast and memory efficient"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

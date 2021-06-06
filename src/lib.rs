@@ -126,10 +126,43 @@ pub fn delete_line(path:&str,line:usize)->io::Result<()>{
     Ok(())
 }
 #[allow(dead_code)]
+pub fn delete_line_with_capacity(path:&str,line:usize,capacity:usize)->io::Result<()>{
+    {
+        use std::io::Write;
+        let mut file_ganti = std::fs::File::create(format!("{}._pengganti",path))?;
+        let mut file = std::io::BufReader::with_capacity(capacity,std::fs::File::open(format!("{}",path))?);
+        let mut buf = String::with_capacity(capacity);
+        let mut i = 1;
+        while file.read_line(&mut buf)? != 0 {
+            if i != line  { file_ganti.write(buf.as_bytes())?;} 
+            buf.clear();
+            i = i + 1;
+        }
+    }
+    std::fs::rename(format!("{}._pengganti",path), format!("{}",path))?;
+    Ok(())
+}
+#[allow(dead_code)]
 pub fn read_line_index(path:&str,line:usize)-> io::Result<String>{
     use std::io::{Error, ErrorKind};
     let mut file = BufReader::new(File::open(format!("{}",path))?);
     let mut buf = String::with_capacity(100);
+    let mut i = 1;
+    while file.read_line(&mut buf)? != 0 
+    {
+        if i == line {
+            return Ok(buf)
+        }
+        buf.clear();
+        i = i + 1
+    }
+    Err(Error::new(ErrorKind::Other, "line don't exist"))
+}
+#[allow(dead_code)]
+pub fn read_line_index_with_capacity(path:&str,line:usize,capacity: usize)-> io::Result<String>{
+    use std::io::{Error, ErrorKind};
+    let mut file = BufReader::with_capacity(capacity,File::open(format!("{}",path))?);
+    let mut buf = String::with_capacity(capacity);
     let mut i = 1;
     while file.read_line(&mut buf)? != 0 
     {
@@ -162,6 +195,26 @@ pub fn replase_line(path:&str,replase:&str,line:usize)->io::Result<()>{
     Ok(())
 }
 #[allow(dead_code)]
+pub fn replase_line_with_capacity(path:&str,replase:&str,line:usize,capacity: usize)->io::Result<()>{
+    {
+        use std::io::Write;
+        let mut file_ganti = std::fs::File::create(format!("{}._pengganti",path))?;
+        let mut file = std::io::BufReader::with_capacity(capacity,std::fs::File::open(format!("{}",path))?);
+        let mut buf = String::with_capacity(capacity);
+        let mut i = 1;
+        while file.read_line(&mut buf)? != 0 {
+            match i {
+                n if n == line =>{file_ganti.write(replase.as_bytes())?;}
+                _=>{file_ganti.write(buf.as_bytes())?;}
+            }
+            buf.clear();
+            i = i + 1;
+        }
+    }
+    std::fs::rename(format!("{}._pengganti",path), format!("{}",path))?;
+    Ok(())
+}
+#[allow(dead_code)]
 pub fn rotate(path:&str,lop:usize) ->io::Result<()> {
     use std::io::Write;
     for _ in 0..lop {
@@ -171,6 +224,27 @@ pub fn rotate(path:&str,lop:usize) ->io::Result<()> {
             let mut file_ganti = std::fs::File::create(format!("{}._pengganti",path))?;
             if file.read_line(&mut buf2)? != 0 {
                 let mut buf = String::with_capacity(100);
+                while file.read_line(&mut buf)? != 0 {
+                    file_ganti.write(buf.as_bytes())?;
+                    buf.clear()
+                }
+            }
+            file_ganti.write(buf2.as_bytes())?;
+        }
+        std::fs::rename(format!("{}._pengganti",path), format!("{}",path))?;
+    }
+    Ok(())
+}
+#[allow(dead_code)]
+pub fn rotate_with_capacity(path:&str,lop:usize,capacity: usize) ->io::Result<()> {
+    use std::io::Write;
+    for _ in 0..lop {
+        let mut buf2 = String::with_capacity(100);
+        {
+            let mut file = BufReader::with_capacity(capacity,File::open(format!("{}",path))?);
+            let mut file_ganti = std::fs::File::create(format!("{}._pengganti",path))?;
+            if file.read_line(&mut buf2)? != 0 {
+                let mut buf = String::with_capacity(capacity);
                 while file.read_line(&mut buf)? != 0 {
                     file_ganti.write(buf.as_bytes())?;
                     buf.clear()
@@ -212,8 +286,24 @@ pub fn pust(path:&str,_str:&str) ->io::Result<()> {
     Ok(())
 }
 #[allow(dead_code)]
+pub fn pust_with_capacity(path:&str,_str:&str,capacity: usize) ->io::Result<()> {
+    {
+        use std::io::Write;
+        let mut file_ganti = std::fs::File::create(format!("{}._pengganti",path))?;
+        let mut file = BufReader::with_capacity(capacity,File::open(format!("{}",path))?);
+        let mut buf = String::with_capacity(capacity);
+        while file.read_line(&mut buf)? != 0 {
+            file_ganti.write(buf.as_bytes())?;
+            buf.clear()
+        }
+        file_ganti.write(_str.as_bytes())?;
+    }
+    std::fs::rename(format!("{}._pengganti",path), format!("{}",path))?;
+    Ok(())
+}
+#[allow(dead_code)]
 pub struct FileIndexing{
-    pub file:String
+    pub file:String,
 }
 #[allow(dead_code)]
 impl FileIndexing {
@@ -234,6 +324,109 @@ impl FileIndexing {
     }
     pub fn replase_line(&self,replase:&str,line:usize)->io::Result<()>{
         replase_line(&self.file, replase, line)
+    }
+    pub fn readto_string(&self)->io::Result<String>{
+        std::fs::read_to_string(&self.file)
+    }
+    pub fn delete(self)->io::Result<()>{
+        std::fs::remove_file(self.file)
+    }
+    pub fn is_empty(&self)->bool{
+        std::fs::read_to_string(&self.file).unwrap().is_empty()
+    }
+}
+#[allow(non_camel_case_types)]
+#[allow(dead_code)]
+pub struct FileIndexing_with_capacity{
+    pub file:String,
+    pub capacity:usize,
+    pub buf:String
+}
+#[allow(dead_code)]
+impl FileIndexing_with_capacity {
+    pub fn len(&self) ->io::Result<usize>{
+        let mut i :usize = 0;
+        for _ in BufReader::with_capacity(self.capacity,File::open(&self.file)?).lines() {
+            i = i + 1
+        }
+        Ok(i)
+    }
+    pub fn index(&mut self,indx:usize)->io::Result<String>{
+        use std::io::{Error, ErrorKind};
+        let mut file = BufReader::with_capacity(self.capacity,File::open(format!("{}",self.file))?);
+        
+        let mut i = 1;
+        while file.read_line(&mut self.buf)? != 0 
+        {
+            if i == indx {
+                self.buf.clear();
+                return Ok(self.buf.clone())
+            }
+            self.buf.clear();
+            i = i + 1
+        }
+        self.buf.clear();
+        Err(Error::new(ErrorKind::Other, "line don't exist"))
+    }
+    pub fn pop(&self)->io::Result<()>{
+        delete_line_with_capacity(&self.file, self.len()?,self.capacity)?;
+        Ok(())
+    }
+    pub fn rotate(&mut self,lop: usize) ->io::Result<()>{
+        use std::io::Write;
+        for _ in 0..lop {
+            let mut buf2 = String::with_capacity(100);
+            {
+                let mut file = BufReader::with_capacity(self.capacity,File::open(format!("{}",self.file))?);
+                let mut file_ganti = std::fs::File::create(format!("{}._pengganti",self.file))?;
+                if file.read_line(&mut buf2)? != 0 {
+                    
+                    while file.read_line(&mut self.buf)? != 0 {
+                        file_ganti.write(self.buf.as_bytes())?;
+                        self.buf.clear()
+                    }
+                    self.buf.clear()
+                }
+                file_ganti.write(buf2.as_bytes())?;
+            }
+            std::fs::rename(format!("{}._pengganti",self.file), format!("{}",self.file))?;
+        }
+        Ok(())
+    }
+    pub fn pust_str(&mut self,_str: &str)->io::Result<()>{
+        {
+            use std::io::Write;
+            let mut file_ganti = std::fs::File::create(format!("{}._pengganti",self.file))?;
+            let mut file = BufReader::with_capacity(self.capacity,File::open(format!("{}",self.file))?);
+            while file.read_line(&mut self.buf)? != 0 {
+                file_ganti.write(self.buf.as_bytes())?;
+                self.buf.clear()
+            }
+            self.buf.clear();
+            file_ganti.write(_str.as_bytes())?;
+        }
+        std::fs::rename(format!("{}._pengganti",self.file), format!("{}",self.file))?;
+        Ok(())
+    }
+    pub fn replase_line(&mut self,replase:&str,line:usize)->io::Result<()>{
+        {
+            use std::io::Write;
+            let mut file_ganti = std::fs::File::create(format!("{}._pengganti",self.file))?;
+            let mut file = std::io::BufReader::with_capacity(self.capacity,std::fs::File::open(format!("{}",self.file))?);
+            
+            let mut i = 1;
+            while file.read_line(&mut self.buf)? != 0 {
+                match i {
+                    n if n == line =>{file_ganti.write(replase.as_bytes())?;}
+                    _=>{file_ganti.write(self.buf.as_bytes())?;}
+                }
+                self.buf.clear();
+                i = i + 1;
+            }
+        }
+        self.buf.clear();
+        std::fs::rename(format!("{}._pengganti",self.file), format!("{}",self.file))?;
+        Ok(())
     }
     pub fn readto_string(&self)->io::Result<String>{
         std::fs::read_to_string(&self.file)

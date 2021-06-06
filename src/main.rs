@@ -16,7 +16,8 @@ fn main(){
     //lib::replase_line_macro!(file,"pengganti\n",2,"pengganti\n",3);
     //lib::rotate(file, 1000).expect("msg: &str");
     //lib::pust(file, "pust\n").expect("msg: &str")
-    
+    //lib::delete_line_with_capacity(file, 0, 100);
+    /*
     let f = lib::FileIndexing{file:file.to_string()};
       println!("{}", f.readto_string().expect("erro"));
       f.rotate(3).expect("erro");
@@ -26,4 +27,13 @@ fn main(){
       println!("{}", f.len().expect("erro"));
       println!("{}", f.index(2).expect("error"));
       f.delete().expect("error");
+      */
+      println!("{}",lib::len(file).unwrap());
+      let mut f = lib::FileIndexing_with_capacity{
+        file:file.to_string(),
+        capacity:1000,
+        buf:String::with_capacity(200),
+      };
+
+      f.rotate(2);
 }
