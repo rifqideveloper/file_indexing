@@ -1,7 +1,8 @@
 mod lib;
 fn main(){
     //file
-    let file = "testing\\file.txt";
+    // let file = "testing\\file.txt";
+    let file = "testing/test2.txt";
     //deleting file line
     //lib::delete_line(file, 4).expect("erro");
     //lib::delete_line_macro!(file,2 => 4);
@@ -35,5 +36,5 @@ fn main(){
         buf:String::with_capacity(200),
       };
 
-      f.rotate(2);
+      f.rotate(2).unwrap();
 }
