@@ -12,14 +12,14 @@ macro_rules! delete_line_macro {
             let mut file = std::io::BufReader::new(std::fs::File::open(format!("{}",$path)).expect("Unable to open"));
             let mut buf = String::with_capacity(100);
 
-            let mut i = 1;
+            let mut i: usize = 1;
             while file.read_line(&mut buf).expect("Unable to read file") != 0 {
                 match i {
                     $($xline =>{})*
-                    _=>{file_ganti.write(buf.as_bytes()).expect("");}
+                    _ => {file_ganti.write_all(buf.as_bytes()).expect("");}
                 }
                 buf.clear();
-                i = i + 1;
+                i += 1;
             }
         }
         std::fs::rename(format!("{}._pengganti",$path), format!("{}",$path)).expect("Unable to read");
@@ -32,14 +32,14 @@ macro_rules! delete_line_macro {
             let mut file = std::io::BufReader::new(std::fs::File::open(format!("{}",$path)).expect("Unable to open"));
             let mut buf = String::with_capacity(100);
 
-            let mut i = 1;
+            let mut i: usize = 1;
             while file.read_line(&mut buf).expect("Unable to read file") != 0 {
                 match i {
-                    $line..=$xline =>{}
-                    _=>{file_ganti.write(buf.as_bytes()).expect("Unable to write file");}
+                    $line..=$xline => {}
+                    _ => {file_ganti.write_all(buf.as_bytes()).expect("Unable to write file");}
                 }
                 buf.clear();
-                i = i + 1;
+                i += 1;
             }
         }
         std::fs::rename(format!("{}._pengganti",$path), format!("{}",$path)).expect("Unable to read");
@@ -54,13 +54,13 @@ macro_rules! read_line_index_macro {
             let mut buf = String::with_capacity(100);
             let mut buf2 = String::with_capacity(100);
 
-            let mut i = 1;
+            let mut i: usize = 1;
             use std::io::{BufRead};
             while file.read_line(&mut buf).expect("Unable to read file") != 0
             {
                 $(if i == $xline {buf2.push_str(buf.as_str())})*
                 buf.clear();
-                i = i + 1
+                i += 1
             }
             buf2
         }
@@ -71,16 +71,16 @@ macro_rules! read_line_index_macro {
             let mut buf =  String::with_capacity(100);
             let mut buf2 = String::with_capacity(100);
 
-            let mut i = 1;
+            let mut i: usize = 1;
             use std::io::{BufRead};
             while file.read_line(&mut buf).expect("Unable to read") != 0
             {
                 match i {
-                    $line..=$xline =>{buf2.push_str(buf.as_str())}
-                    _=>{}
+                    $line..=$xline => {buf2.push_str(buf.as_str())}
+                    _ => {}
                 }
                 buf.clear();
-                i = i + 1
+                i += 1
             }
             buf2
         }
@@ -97,17 +97,17 @@ macro_rules! replase_line_macro{
             let mut file = std::io::BufReader::new(std::fs::File::open(format!("{}",$path)).expect("Unable to open file"));
             let mut buf = String::with_capacity(100);
 
-            let mut i = 1;
+            let mut i: usize = 1;
             while file.read_line(&mut buf).expect("") != 0 {
                 match i {
-                    $(n if n == $line =>{file_ganti.write($xline.as_bytes()).expect("Unable to write file");})*
-                    _=>{file_ganti.write(buf.as_bytes()).expect("Unable to write file");}
+                    $(n if n == $line => {file_ganti.write_all($xline.as_bytes()).expect("Unable to write file");})*
+                    _ => {file_ganti.write_all(buf.as_bytes()).expect("Unable to write file");}
                 }
                 buf.clear();
-                i = i + 1;
+                i += 1;
             }
         }
-        std::fs::rename(format!("{}._pengganti",$path), format!("{}",$path)).expect("Unable to rename ._pengganti");
+        std::fs::rename(format!("{}._pengganti", $path), format!("{}", $path)).expect("Unable to rename ._pengganti");
     };
 }
 
@@ -117,8 +117,8 @@ pub(crate) use delete_line_macro;
 pub(crate) use read_line_index_macro;
 #[allow(unused_imports)]
 pub(crate) use replase_line_macro;
-#[allow(dead_code)]
 
+#[allow(dead_code)]
 pub fn delete_line(path: &str, line: usize) -> io::Result<()> {
     {
         use std::io::Write;
@@ -126,7 +126,7 @@ pub fn delete_line(path: &str, line: usize) -> io::Result<()> {
         let mut file = std::io::BufReader::new(std::fs::File::open(path.to_string())?);
         let mut buf = String::with_capacity(100);
 
-        let mut i = 1;
+        let mut i: usize = 1;
         while file.read_line(&mut buf)? != 0 {
             if i != line {
                 file_ganti.write_all(buf.as_bytes())?;
@@ -150,7 +150,7 @@ pub fn delete_line_with_capacity(path: &str, line: usize, capacity: usize) -> io
             std::io::BufReader::with_capacity(capacity, std::fs::File::open(path.to_string())?);
         let mut buf = String::with_capacity(capacity);
 
-        let mut i = 1;
+        let mut i: usize = 1;
         while file.read_line(&mut buf)? != 0 {
             if i != line {
                 file_ganti.write_all(buf.as_bytes())?;
@@ -169,7 +169,7 @@ pub fn read_line_index(path: &str, line: usize) -> io::Result<String> {
     let mut file = BufReader::new(File::open(path.to_string())?);
     let mut buf = String::with_capacity(100);
 
-    let mut i = 1;
+    let mut i: usize = 1;
     while file.read_line(&mut buf)? != 0 {
         if i == line {
             return Ok(buf);
@@ -190,7 +190,7 @@ pub fn read_line_index_with_capacity(
     let mut file = BufReader::with_capacity(capacity, File::open(path.to_string())?);
     let mut buf = String::with_capacity(capacity);
 
-    let mut i = 1;
+    let mut i: usize = 1;
     while file.read_line(&mut buf)? != 0 {
         if i == line {
             return Ok(buf);
@@ -209,7 +209,7 @@ pub fn replase_line(path: &str, replase: &str, line: usize) -> io::Result<()> {
         let mut file = std::io::BufReader::new(std::fs::File::open(path.to_string())?);
         let mut buf = String::with_capacity(100);
 
-        let mut i = 1;
+        let mut i: usize = 1;
         while file.read_line(&mut buf)? != 0 {
             match i {
                 n if n == line => {
@@ -241,7 +241,7 @@ pub fn replase_line_with_capacity(
             std::io::BufReader::with_capacity(capacity, std::fs::File::open(path.to_string())?);
         let mut buf = String::with_capacity(capacity);
 
-        let mut i = 1;
+        let mut i: usize = 1;
         while file.read_line(&mut buf)? != 0 {
             match i {
                 n if n == line => {
@@ -422,7 +422,7 @@ impl FileIndexing_with_capacity {
         use std::io::{Error, ErrorKind};
         let mut file = BufReader::with_capacity(self.capacity, File::open(self.file.to_string())?);
 
-        let mut i = 1;
+        let mut i: usize = 1;
         while file.read_line(&mut self.buf)? != 0 {
             if i == indx {
                 self.buf.clear();
@@ -489,7 +489,7 @@ impl FileIndexing_with_capacity {
                 std::fs::File::open(self.file.to_string())?,
             );
 
-            let mut i = 1;
+            let mut i: usize = 1;
             while file.read_line(&mut self.buf)? != 0 {
                 match i {
                     n if n == line => {
