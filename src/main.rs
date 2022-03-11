@@ -56,6 +56,7 @@ mod test {
 
     #[test]
     fn file_len() {
-        assert_eq!(lib::len(FILE_TEST).unwrap(), 21);
+        //file is 22 line
+        assert_eq!(lib::len(FILE_TEST).unwrap(), 22);
     }
 }
